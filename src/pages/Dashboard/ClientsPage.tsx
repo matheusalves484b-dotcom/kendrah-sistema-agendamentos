@@ -1,14 +1,28 @@
 import { useMemo, useState } from "react";
-import { User, Mail, Phone, Search, CalendarDays } from "lucide-react";
+import { User, Mail, Phone, Search, CalendarDays, FileDown, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardHeader from "@/components/Dashboard/DashboardHeader";
 import NewAppointmentDialog from "@/components/Dashboard/Calendar/NewAppointmentDialog";
 import { useAppointments } from "@/hooks/useAppointments";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
+import {
+  exportAppointmentsCsv,
+  exportAppointmentsPdf,
+  monthLabel,
+} from "@/lib/exportAppointments";
+
 
 interface DerivedClient {
   key: string;
