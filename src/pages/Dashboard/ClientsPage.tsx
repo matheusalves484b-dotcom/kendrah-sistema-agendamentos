@@ -13,6 +13,7 @@ import {
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardHeader from "@/components/Dashboard/DashboardHeader";
 import NewAppointmentDialog from "@/components/Dashboard/Calendar/NewAppointmentDialog";
+import MonthlyReportCard from "@/components/Dashboard/MonthlyReportCard";
 import { useAppointments } from "@/hooks/useAppointments";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
