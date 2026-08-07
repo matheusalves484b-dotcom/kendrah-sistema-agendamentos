@@ -115,6 +115,42 @@ export type Database = {
           },
         ]
       }
+      monthly_reports: {
+        Row: {
+          appointments_count: number
+          created_at: string
+          csv_path: string | null
+          email_error: string | null
+          email_status: string
+          id: string
+          pdf_path: string | null
+          period: string
+          user_id: string
+        }
+        Insert: {
+          appointments_count?: number
+          created_at?: string
+          csv_path?: string | null
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          pdf_path?: string | null
+          period: string
+          user_id: string
+        }
+        Update: {
+          appointments_count?: number
+          created_at?: string
+          csv_path?: string | null
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          pdf_path?: string | null
+          period?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           business_logo_url: string | null
@@ -142,6 +178,36 @@ export type Database = {
           slug?: string | null
           updated_at?: string
           whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      report_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          include_csv: boolean
+          include_pdf: boolean
+          recipient_email: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          include_csv?: boolean
+          include_pdf?: boolean
+          recipient_email?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          include_csv?: boolean
+          include_pdf?: boolean
+          recipient_email?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
