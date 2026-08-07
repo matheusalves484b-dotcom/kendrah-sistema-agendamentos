@@ -14,13 +14,250 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          end_time: string
+          id: string
+          notes: string | null
+          reminder_sent: boolean
+          service_id: string
+          service_name: string
+          start_time: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          end_time: string
+          id?: string
+          notes?: string | null
+          reminder_sent?: boolean
+          service_id: string
+          service_name: string
+          start_time: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          end_time?: string
+          id?: string
+          notes?: string | null
+          reminder_sent?: boolean
+          service_id?: string
+          service_name?: string
+          start_time?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_slots: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_available: boolean | null
+          start_time: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_available?: boolean | null
+          start_time: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_available?: boolean | null
+          start_time?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_reports: {
+        Row: {
+          appointments_count: number
+          created_at: string
+          csv_path: string | null
+          email_error: string | null
+          email_status: string
+          id: string
+          pdf_path: string | null
+          period: string
+          user_id: string
+        }
+        Insert: {
+          appointments_count?: number
+          created_at?: string
+          csv_path?: string | null
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          pdf_path?: string | null
+          period: string
+          user_id: string
+        }
+        Update: {
+          appointments_count?: number
+          created_at?: string
+          csv_path?: string | null
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          pdf_path?: string | null
+          period?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          business_logo_url: string | null
+          business_name: string | null
+          created_at: string
+          id: string
+          slug: string | null
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          business_logo_url?: string | null
+          business_name?: string | null
+          created_at?: string
+          id: string
+          slug?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          business_logo_url?: string | null
+          business_name?: string | null
+          created_at?: string
+          id?: string
+          slug?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      report_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          include_csv: boolean
+          include_pdf: boolean
+          recipient_email: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          include_csv?: boolean
+          include_pdf?: boolean
+          recipient_email?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          include_csv?: boolean
+          include_pdf?: boolean
+          recipient_email?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration: number
+          id: string
+          name: string
+          price: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration: number
+          id?: string
+          name: string
+          price?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration?: number
+          id?: string
+          name?: string
+          price?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_slug: { Args: { input_text: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
