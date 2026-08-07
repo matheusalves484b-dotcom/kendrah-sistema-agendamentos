@@ -159,7 +159,7 @@ const ClientsPage = () => {
           onActionClick={() => setDialogOpen(true)}
         />
 
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
@@ -170,19 +170,48 @@ const ClientsPage = () => {
             />
           </div>
 
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full sm:w-[220px]">
-              <SelectValue placeholder="Selecione o mês" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os meses</SelectItem>
-              {monthOptions.map((month) => (
-                <SelectItem key={month} value={month}>
-                  {monthLabel(month)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Selecione o mês" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os meses</SelectItem>
+                {monthOptions.map((month) => (
+                  <SelectItem key={month} value={month}>
+                    {monthLabel(month)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedService} onValueChange={setSelectedService}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Serviço" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os serviços</SelectItem>
+                {serviceOptions.map(([id, name]) => (
+                  <SelectItem key={id} value={id}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => handleExport("csv")}>
@@ -194,10 +223,17 @@ const ClientsPage = () => {
           </div>
         </div>
 
-        <p className="mb-4 text-sm text-muted-foreground">
-          {monthLabel(selectedMonth)} · {monthAppointments.length} agendamento(s) ·{" "}
-          {clients.length} cliente(s)
-        </p>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            {monthLabel(selectedMonth)} · {filteredAppointments.length} agendamento(s) ·{" "}
+            {clients.length} cliente(s)
+          </p>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 px-2 text-xs">
+              <X size={14} className="mr-1" /> Limpar filtros
+            </Button>
+          )}
+        </div>
 
 
         {loading ? (
