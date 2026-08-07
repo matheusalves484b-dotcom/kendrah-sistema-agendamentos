@@ -36,12 +36,28 @@ interface DerivedClient {
 const ClientsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState("all");
   const { appointments, loading } = useAppointments();
+
+  const monthOptions = useMemo(() => {
+    const keys = new Set<string>();
+    appointments.forEach((appointment) => {
+      keys.add(format(new Date(appointment.start_time), "yyyy-MM"));
+    });
+    return Array.from(keys).sort((a, b) => b.localeCompare(a));
+  }, [appointments]);
+
+  const monthAppointments = useMemo(() => {
+    if (selectedMonth === "all") return appointments;
+    return appointments.filter(
+      (appointment) => format(new Date(appointment.start_time), "yyyy-MM") === selectedMonth
+    );
+  }, [appointments, selectedMonth]);
 
   const clients = useMemo<DerivedClient[]>(() => {
     const map = new Map<string, DerivedClient>();
 
-    appointments.forEach((appointment) => {
+    monthAppointments.forEach((appointment) => {
       const key = (appointment.customer_email || appointment.customer_phone).toLowerCase();
       const start = new Date(appointment.start_time);
       const existing = map.get(key);
@@ -68,7 +84,7 @@ const ClientsPage = () => {
     return Array.from(map.values()).sort(
       (a, b) => b.lastAppointment.getTime() - a.lastAppointment.getTime()
     );
-  }, [appointments]);
+  }, [monthAppointments]);
 
   const filteredClients = clients.filter((client) => {
     if (!searchTerm) return true;
@@ -79,6 +95,19 @@ const ClientsPage = () => {
       client.phone.includes(searchTerm)
     );
   });
+
+  const handleExport = (type: "csv" | "pdf") => {
+    if (monthAppointments.length === 0) {
+      toast.error("Nenhum agendamento no período selecionado para exportar.");
+      return;
+    }
+    if (type === "csv") {
+      exportAppointmentsCsv(monthAppointments, selectedMonth);
+    } else {
+      exportAppointmentsPdf(monthAppointments, selectedMonth);
+    }
+    toast.success(`Exportação ${type.toUpperCase()} gerada com sucesso.`);
+  };
 
   return (
     <DashboardLayout>
@@ -91,15 +120,46 @@ const ClientsPage = () => {
           onActionClick={() => setDialogOpen(true)}
         />
 
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-          <Input
-            className="pl-10"
-            placeholder="Buscar cliente por nome, email ou telefone"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              className="pl-10"
+              placeholder="Buscar cliente por nome, email ou telefone"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os meses</SelectItem>
+              {monthOptions.map((month) => (
+                <SelectItem key={month} value={month}>
+                  {monthLabel(month)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => handleExport("csv")}>
+              <FileDown size={16} className="mr-2" /> CSV
+            </Button>
+            <Button variant="outline" onClick={() => handleExport("pdf")}>
+              <FileText size={16} className="mr-2" /> PDF
+            </Button>
+          </div>
         </div>
+
+        <p className="mb-4 text-sm text-muted-foreground">
+          {monthLabel(selectedMonth)} · {monthAppointments.length} agendamento(s) ·{" "}
+          {clients.length} cliente(s)
+        </p>
+
 
         {loading ? (
           <div className="flex justify-center items-center h-40">
