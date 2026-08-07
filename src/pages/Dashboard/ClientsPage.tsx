@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { User, Mail, Phone, Search, CalendarDays, FileDown, FileText } from "lucide-react";
+import { User, Mail, Phone, Search, CalendarDays, FileDown, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import {
   exportAppointmentsCsv,
   exportAppointmentsPdf,
   monthLabel,
+  statusLabel,
 } from "@/lib/exportAppointments";
 
 
@@ -33,10 +34,20 @@ interface DerivedClient {
   lastAppointment: Date;
 }
 
+const statusOptions: { value: string; label: string }[] = [
+  { value: "all", label: "Todos os status" },
+  { value: "pending", label: "Pendente" },
+  { value: "confirmed", label: "Confirmado" },
+  { value: "cancelled", label: "Cancelado" },
+  { value: "completed", label: "Concluído" },
+];
+
 const ClientsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState("all");
+  const [selectedService, setSelectedService] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const { appointments, loading } = useAppointments();
 
   const monthOptions = useMemo(() => {
@@ -47,17 +58,33 @@ const ClientsPage = () => {
     return Array.from(keys).sort((a, b) => b.localeCompare(a));
   }, [appointments]);
 
-  const monthAppointments = useMemo(() => {
-    if (selectedMonth === "all") return appointments;
-    return appointments.filter(
-      (appointment) => format(new Date(appointment.start_time), "yyyy-MM") === selectedMonth
-    );
-  }, [appointments, selectedMonth]);
+  const serviceOptions = useMemo(() => {
+    const names = new Map<string, string>();
+    appointments.forEach((appointment) => {
+      if (!names.has(appointment.service_id)) {
+        names.set(appointment.service_id, appointment.service_name);
+      }
+    });
+    return Array.from(names.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [appointments]);
+
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((appointment) => {
+      const matchesMonth =
+        selectedMonth === "all" ||
+        format(new Date(appointment.start_time), "yyyy-MM") === selectedMonth;
+      const matchesService =
+        selectedService === "all" || appointment.service_id === selectedService;
+      const matchesStatus =
+        selectedStatus === "all" || appointment.status === selectedStatus;
+      return matchesMonth && matchesService && matchesStatus;
+    });
+  }, [appointments, selectedMonth, selectedService, selectedStatus]);
 
   const clients = useMemo<DerivedClient[]>(() => {
     const map = new Map<string, DerivedClient>();
 
-    monthAppointments.forEach((appointment) => {
+    filteredAppointments.forEach((appointment) => {
       const key = (appointment.customer_email || appointment.customer_phone).toLowerCase();
       const start = new Date(appointment.start_time);
       const existing = map.get(key);
@@ -84,7 +111,7 @@ const ClientsPage = () => {
     return Array.from(map.values()).sort(
       (a, b) => b.lastAppointment.getTime() - a.lastAppointment.getTime()
     );
-  }, [monthAppointments]);
+  }, [filteredAppointments]);
 
   const filteredClients = clients.filter((client) => {
     if (!searchTerm) return true;
@@ -96,18 +123,29 @@ const ClientsPage = () => {
     );
   });
 
+  const hasActiveFilters =
+    selectedMonth !== "all" || selectedService !== "all" || selectedStatus !== "all" || searchTerm !== "";
+
+  const clearFilters = () => {
+    setSelectedMonth("all");
+    setSelectedService("all");
+    setSelectedStatus("all");
+    setSearchTerm("");
+  };
+
   const handleExport = (type: "csv" | "pdf") => {
-    if (monthAppointments.length === 0) {
-      toast.error("Nenhum agendamento no período selecionado para exportar.");
+    if (filteredAppointments.length === 0) {
+      toast.error("Nenhum agendamento no período/filtro selecionado para exportar.");
       return;
     }
     if (type === "csv") {
-      exportAppointmentsCsv(monthAppointments, selectedMonth);
+      exportAppointmentsCsv(filteredAppointments, selectedMonth);
     } else {
-      exportAppointmentsPdf(monthAppointments, selectedMonth);
+      exportAppointmentsPdf(filteredAppointments, selectedMonth);
     }
     toast.success(`Exportação ${type.toUpperCase()} gerada com sucesso.`);
   };
+
 
   return (
     <DashboardLayout>
@@ -120,7 +158,7 @@ const ClientsPage = () => {
           onActionClick={() => setDialogOpen(true)}
         />
 
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
@@ -131,19 +169,48 @@ const ClientsPage = () => {
             />
           </div>
 
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full sm:w-[220px]">
-              <SelectValue placeholder="Selecione o mês" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os meses</SelectItem>
-              {monthOptions.map((month) => (
-                <SelectItem key={month} value={month}>
-                  {monthLabel(month)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Selecione o mês" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os meses</SelectItem>
+                {monthOptions.map((month) => (
+                  <SelectItem key={month} value={month}>
+                    {monthLabel(month)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedService} onValueChange={setSelectedService}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Serviço" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os serviços</SelectItem>
+                {serviceOptions.map(([id, name]) => (
+                  <SelectItem key={id} value={id}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => handleExport("csv")}>
@@ -155,10 +222,17 @@ const ClientsPage = () => {
           </div>
         </div>
 
-        <p className="mb-4 text-sm text-muted-foreground">
-          {monthLabel(selectedMonth)} · {monthAppointments.length} agendamento(s) ·{" "}
-          {clients.length} cliente(s)
-        </p>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            {monthLabel(selectedMonth)} · {filteredAppointments.length} agendamento(s) ·{" "}
+            {clients.length} cliente(s)
+          </p>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 px-2 text-xs">
+              <X size={14} className="mr-1" /> Limpar filtros
+            </Button>
+          )}
+        </div>
 
 
         {loading ? (

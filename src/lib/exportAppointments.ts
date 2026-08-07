@@ -4,12 +4,14 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Appointment } from "@/types";
 
-const statusLabels: Record<Appointment["status"], string> = {
+export const statusLabels: Record<Appointment["status"], string> = {
   pending: "Pendente",
   confirmed: "Confirmado",
   cancelled: "Cancelado",
   completed: "Concluído",
 };
+
+export const statusLabel = (status: Appointment["status"]) => statusLabels[status] ?? status;
 
 export const monthLabel = (monthKey: string) => {
   if (monthKey === "all") return "Todos os meses";
