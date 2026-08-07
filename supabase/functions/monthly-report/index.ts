@@ -10,8 +10,8 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const TZ = "America/Sao_Paulo";
 
-// E-mail que recebe os relatórios quando a prestadora não definiu outro destinatário.
-const DEFAULT_RECIPIENT = "agendamentoskendrah@gmail.com";
+// Remetente fixo dos relatórios mensais.
+const SENDER_EMAIL = "agendamentoskendrah@gmail.com";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",
@@ -135,8 +135,14 @@ async function generateForUser(userId: string, period: string) {
     if (uploadError) throw uploadError;
   }
 
-  const recipient = settings?.recipient_email ?? DEFAULT_RECIPIENT;
+  // Destinatário: e-mail configurado ou, por padrão, o e-mail da conta da prestadora.
+  let recipient = settings?.recipient_email ?? null;
+  if (!recipient) {
+    const { data: authUser } = await admin.auth.admin.getUserById(userId);
+    recipient = authUser?.user?.email ?? null;
+  }
   const emailStatus = recipient ? "pending" : "no_recipient";
+  console.log(`Relatório ${period} de ${userId}: remetente ${SENDER_EMAIL} -> ${recipient ?? "sem destinatário"}`);
 
   const { error: upsertError } = await admin
     .from("monthly_reports")
