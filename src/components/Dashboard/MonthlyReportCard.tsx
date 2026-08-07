@@ -43,7 +43,7 @@ const MonthlyReportCard = () => {
         .maybeSingle();
       return {
         enabled: data?.enabled ?? true,
-        recipient_email: data?.recipient_email ?? user.email ?? "",
+        recipient_email: data?.recipient_email ?? DEFAULT_RECIPIENT,
         include_csv: data?.include_csv ?? true,
         include_pdf: data?.include_pdf ?? true,
       } satisfies ReportSettings;

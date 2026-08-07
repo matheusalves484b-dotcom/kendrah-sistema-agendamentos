@@ -10,6 +10,9 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const TZ = "America/Sao_Paulo";
 
+// E-mail que recebe os relatórios quando a prestadora não definiu outro destinatário.
+const DEFAULT_RECIPIENT = "agendamentoskendrah@gmail.com";
+
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",
   confirmed: "Confirmado",
@@ -132,7 +135,7 @@ async function generateForUser(userId: string, period: string) {
     if (uploadError) throw uploadError;
   }
 
-  const recipient = settings?.recipient_email ?? null;
+  const recipient = settings?.recipient_email ?? DEFAULT_RECIPIENT;
   const emailStatus = recipient ? "pending" : "no_recipient";
 
   const { error: upsertError } = await admin
