@@ -159,7 +159,10 @@ const ClientsPage = () => {
           onActionClick={() => setDialogOpen(true)}
         />
 
+        <MonthlyReportCard />
+
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
