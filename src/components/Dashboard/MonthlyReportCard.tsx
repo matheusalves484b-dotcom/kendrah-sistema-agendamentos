@@ -17,10 +17,13 @@ interface ReportSettings {
   include_csv: boolean;
   include_pdf: boolean;
 }
+// E-mail padrão que recebe os relatórios mensais.
+const DEFAULT_RECIPIENT = "agendamentoskendrah@gmail.com";
+
 
 const defaultSettings: ReportSettings = {
   enabled: true,
-  recipient_email: "",
+  recipient_email: DEFAULT_RECIPIENT,
   include_csv: true,
   include_pdf: true,
 };
@@ -43,7 +46,7 @@ const MonthlyReportCard = () => {
         .maybeSingle();
       return {
         enabled: data?.enabled ?? true,
-        recipient_email: data?.recipient_email ?? user.email ?? "",
+        recipient_email: data?.recipient_email ?? DEFAULT_RECIPIENT,
         include_csv: data?.include_csv ?? true,
         include_pdf: data?.include_pdf ?? true,
       } satisfies ReportSettings;
