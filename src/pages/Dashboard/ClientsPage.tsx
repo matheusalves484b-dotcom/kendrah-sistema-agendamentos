@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { User, Mail, Phone, Search, CalendarDays, FileDown, FileText, X } from "lucide-react";
+import { User, Mail, Phone, Search, CalendarDays, FileDown, FileText, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -147,6 +147,19 @@ const ClientsPage = () => {
     toast.success(`Exportação ${type.toUpperCase()} gerada com sucesso.`);
   };
 
+  const openWhatsApp = (client: DerivedClient) => {
+    const digits = (client.phone || "").replace(/\D/g, "");
+    if (!digits) {
+      toast.error("Este cliente não possui telefone cadastrado.");
+      return;
+    }
+    const withCountry = digits.length <= 11 ? `55${digits}` : digits;
+    const message = encodeURIComponent(
+      `Olá, ${client.name}! Tudo bem? Estou entrando em contato sobre o seu agendamento.`
+    );
+    window.open(`https://wa.me/${withCountry}?text=${message}`, "_blank", "noopener,noreferrer");
+  };
+
 
   return (
     <DashboardLayout>
@@ -277,6 +290,7 @@ const ClientsPage = () => {
                   <th className="py-3 px-4 text-left font-medium">Contato</th>
                   <th className="py-3 px-4 text-left font-medium">Agendamentos</th>
                   <th className="py-3 px-4 text-left font-medium">Último atendimento</th>
+                  <th className="py-3 px-4 text-right font-medium">Contatar</th>
                 </tr>
               </thead>
               <tbody>
@@ -297,6 +311,16 @@ const ClientsPage = () => {
                         <CalendarDays size={14} className="text-muted-foreground" />
                         {format(client.lastAppointment, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                       </div>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openWhatsApp(client)}
+                        aria-label={`Falar com ${client.name} no WhatsApp`}
+                      >
+                        <MessageCircle size={16} className="mr-2" /> WhatsApp
+                      </Button>
                     </td>
                   </tr>
                 ))}
