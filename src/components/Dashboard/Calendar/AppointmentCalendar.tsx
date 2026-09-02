@@ -4,6 +4,7 @@ import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Import Portuguese (Brazil) locale
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './appointment-calendar.css';
 import { CalendarEvent } from '@/types';
 import AppointmentModal from './AppointmentModal';
 
